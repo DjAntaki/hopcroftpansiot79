@@ -23,7 +23,7 @@ def brute_force(vass,state):
 
 
 """
-Modified an implementation found on github :
+Slightly modified an implementation found on github : https://github.com/josch/cycles_tarjan
 """
 def tarjan_cycles(vass):
 
