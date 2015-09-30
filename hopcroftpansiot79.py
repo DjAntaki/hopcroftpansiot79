@@ -25,6 +25,7 @@ def vass1():
 
 def set_equals(s1, s2):
     """
+    Takes 2 1-dimension np.array that we assumes to have unique elements (non-hashable elements such as numpy arrays are ok). Test the set equality between both.
     :param s1:
     :param s2:
     :return:
@@ -38,19 +39,12 @@ def set_equals(s1, s2):
         return True
     return False
 
-    print('s1', s1, 's2', s2)
-    x = len(s1)
-    if x == len(s2) and len(np.intersect1d(s1, s2)) == x:
-        return True
-    return False
-
 
 def inSemiLinearSet(x, dimension, b, Y):
     """
     Is x in the semi-linear set {b + sum_{y_i in Y} c_i * y_i} where c_i are non-negative integers.
     :param x
     :param dimension
-    :param b:
     :param Y: must be an ordered iterable of 2-tuples with integers
     :return:
     """
@@ -63,15 +57,10 @@ def inSemiLinearSet(x, dimension, b, Y):
 
     for u in range(dimension):
         enumerate(Y)
-  #      print([c[i] * y[u] for i, y in enumerate(Y)])
         z3.Sum([c[i] * y[u] for i, y in enumerate(Y)])
         z3.Sum([c[i] * y[u] for i, y in enumerate(Y)]) + b[u]
-   #     print(u)
-    #    print(x)
         z3.Sum([c[i] * y[u] for i, y in enumerate(Y)]) + b[u] == x[u]
-     #   print(z3.Sum([c[i] * y[u] for i, y in enumerate(Y)]) + b[u] == x[u])
         s.add((z3.Sum([c[i] * y[u] for i, y in enumerate(Y)]) + b[u]) == x[u])
-      #  print(s)
     if s.check() == z3.sat:
         return True
     return False
@@ -86,8 +75,6 @@ def reachability(vass, p0, x0):
     :return:
     """
     assert vass.dimension == 2
-
-    # Calculate cycles here or on the fly?
 
     # This call is very important. it calculates all the elementary cycle in the inputed vass.
     vass.cycles = CycleEnumerators.tarjan_cycles(vass)
@@ -113,41 +100,27 @@ def reachability(vass, p0, x0):
                     sp.append(s)
             shorts_path[p] = sp
 
-            #   print(p,x)
-            #   print('sp',shorts_path[p])
         positive_sp = []
         non_positive_sp = []
         for c in shorts_path[p]:
-            print('c', c)
             y = [x]
-            #            print('c',c)
-            #            print('y',y)
-
+         
 
             for transition in c:
-                #          print('t',transition)
-                #          print('y\'',y)
                 if len(y) == 0:
                     # the cycle is not activable
                     break
-                    #             if len(transition)>1:
                 tmp = []
                 for m in transition:
-                    #             print('m',m)
                     tmp += [u + m for u in y]
                 y = filter(lambda x: all(i >= 0 for i in x), tmp)
 
-                #              else :
-                #                   assert len(transition) == 1
-                #                   y = filter(lambda x: all( i >=0 for i in x), [u - transition[0] for u in y])
+            #Sorting positive short path and negative short path
             for i in y:
                 if any(i < x):
                     non_positive_sp.append(i - x)
                 else:
                     positive_sp.append(i - x)
-                    # delta += [i-x for i in y]
-
-                    # Classer ici les positif et non positif?
 
         return positive_sp, non_positive_sp
 
@@ -156,7 +129,7 @@ def reachability(vass, p0, x0):
         unmarked_leaves = []
         accessibility_set = {}
         """
-        cyles must be a set of cycle elements
+        cycles must be a set of cycle elements
 
         marking must be a numpy array
         """
